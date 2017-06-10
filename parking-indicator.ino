@@ -85,50 +85,30 @@ void loop() {
         ms[i] = (sensor[i].ping_median(5)); // Send ping, get distance in cm and print result (0 = outside set distance range)
         distance[i]=sensor[i].convert_cm(ms[i]);
         Serial.print(distance[i]);
-        Serial.println("cm");
+        Serial.print("cm");
         //This calls a linear map function I found that calculate the total pixels to be lit.
         //May eventually wanna add a constrain() here because sensor readings do tend to be weird.
-        numLedsToLight[i] = linearmap(distance[i], tooclose[i], incannotopentrunk[i], 0, (NUM_LEDS/2));
+        numLedsToLight[i] = linearmap(distance[i], tooclose[i], incannotopentrunk[i], 1, (NUM_LEDS/2));
         //Serial.print(" numLedsToLight: ");
         //Serial.println(numLedsToLight[i]);
         //Clean up lights based on mapping
         numLedsToLight[i] = constrain(numLedsToLight[i], 0, (NUM_LEDS/2));
-        //Serial.print(" numLedsToLight_CONSTRAIN: ");
-        //Serial.print(numLedsToLight[i]);   
+        Serial.print("   numLedsToLight: ");
+        Serial.println(numLedsToLight[i]);   
         //Color logic based on depth measurements
-        if (distance[i] < tooclose[i]) {
+        if (distance[i] <= tooclose[i]) {
           color[i] = CRGB::Red;
-//            color[i] = "Red";
-        } else if (distance[i] >= tooclose[i] && distance[i] <=  inopenabletrunk[i]) {
+        } else if (distance[i] > tooclose[i] && distance[i] <=  inopenabletrunk[i]) {
           color[i] = CRGB::Green;
-//            color[i] = "Green";
-        } else if (distance[i] > inopenabletrunk[i] && distance[i] < incannotopentrunk[i]) {
+        } else if (distance[i] > inopenabletrunk[i] && distance[i] <= incannotopentrunk[i]) {
           color[i] = CRGB::Yellow;
-//            color[i] = "Yellow";
-        } else if (distance[i] >= incannotopentrunk[i]) {
-          color[i] = CRGB::Red;
-//            color[i] = "Red";    
+        } else if (distance[i] > incannotopentrunk[i]) {
+          color[i] = CRGB::DodgerBlue;
         } else {
           color[i] = CRGB::Black;
- //           color[i] = "Black";
         }
         distance[i]=0;     
       }        
-//      //Actual fills & show
-//        Serial.print("Karen: ");
-//        String Karen = "leds(0, ";
-//        Karen += numLedsToLight[0];
-//        Karen += ".fill_solid(" + color[0];
-//        Karen += ')';
-//        Serial.println(Karen);
-//
-//        Serial.print("Will: ");
-//        String Will = "leds(16, ";
-//        Will += (15 + numLedsToLight[1]);
-//        Will += ".fill_solid(" + color[1];
-//        Will += ')';
-//        Serial.println(Will);
-
 
       leds(0, (15-numLedsToLight[1])).fill_solid(CRGB::Black);
       leds((15-numLedsToLight[1]), 15).fill_solid(color[1]);
