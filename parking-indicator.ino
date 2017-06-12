@@ -24,7 +24,7 @@
 #include "NewPing.h"
 
 #define LIGHT_SENSOR          A0 //Light Sensor is connected to A0 of Arduino
-#define MIN_LIGHT_THRESHOLD   20 //Setting a min light threshold set for garage door light @ nightime
+#define MIN_LIGHT_THRESHOLD   18 //Setting a min light threshold set for garage door light @ nightime
 
 // HC-SR04 Setup
 #define TRIG_PIN_K              48
@@ -39,12 +39,12 @@ NewPing sensor[2] = {
 // defines distance variables - ints in cms
 long distance[2];
 long ms[2];
-//int tooclose[2] =             {121, 10};
-//int inopenabletrunk[2] =      {137, 20};
-//int incannotopentrunk[2] =    {162, 30};
-int tooclose[2] =             {10, 10};
-int inopenabletrunk[2] =      {20, 20};
-int incannotopentrunk[2] =    {30, 30};
+int tooclose[2] =             {121, 80};
+int inopenabletrunk[2] =      {137, 125};
+int incannotopentrunk[2] =    {160, 150};
+//int tooclose[2] =             {10, 10};
+//int inopenabletrunk[2] =      {20, 20};
+//int incannotopentrunk[2] =    {30, 30};
 
 //LED Strip constants
 #define NUM_LEDS              30
@@ -82,7 +82,7 @@ void loop() {
         ms[i] = 0;
         Serial.print(i);
         Serial.print(" Ping: ");
-        ms[i] = (sensor[i].ping_median(5)); // Send ping, get distance in cm and print result (0 = outside set distance range)
+        ms[i] = (sensor[i].ping_median(3)); // Send ping, get distance in cm and print result (0 = outside set distance range)
         distance[i]=sensor[i].convert_cm(ms[i]);
         Serial.print(distance[i]);
         Serial.print("cm");
@@ -99,9 +99,9 @@ void loop() {
         if (distance[i] <= tooclose[i]) {
           color[i] = CRGB::Red;
         } else if (distance[i] > tooclose[i] && distance[i] <=  inopenabletrunk[i]) {
-          color[i] = CRGB::Green;
-        } else if (distance[i] > inopenabletrunk[i] && distance[i] <= incannotopentrunk[i]) {
           color[i] = CRGB::Yellow;
+        } else if (distance[i] > inopenabletrunk[i] && distance[i] <= incannotopentrunk[i]) {
+          color[i] = CRGB::Green;
         } else if (distance[i] > incannotopentrunk[i]) {
           color[i] = CRGB::DodgerBlue;
         } else {
