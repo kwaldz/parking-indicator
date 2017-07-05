@@ -9,15 +9,14 @@
     and any further than that.
 
     Hardware:
-    - HC-SR04 ultrasonic sensor + 5V power source (shared)
+    - 2x HC-SR04 ultrasonic sensor + 5V power source (shared)
     - APA102 Addressable LED strip, 1m 30LEDs/m + 5V power source (shared)
     - GOSEPP Light Sensor Module for Arduino
     - Arduino Mega 2560
 
 	Stipulations:
 	- The light sensor's purpose to ensure LEDs aren't constantly staying on - this is my janky way of accomplishing that
-	- Right now this only works with a single sensor. My plan is to obtain another sensor and rework this code
-	such that I can simultaneously display 2 cars' depth sensor info.
+	- Reworked for 2 sensors! This setup is intended to split a single LED strip into 2, one half for each car/sensor in the garage.
 */
 
 #include "FastLED.h"
@@ -42,9 +41,6 @@ long ms[2];
 int tooclose[2] =             {121, 80};
 int inopenabletrunk[2] =      {137, 125};
 int incannotopentrunk[2] =    {160, 150};
-//int tooclose[2] =             {10, 10};
-//int inopenabletrunk[2] =      {20, 20};
-//int incannotopentrunk[2] =    {30, 30};
 
 //LED Strip constants
 #define NUM_LEDS              30
@@ -52,11 +48,11 @@ int incannotopentrunk[2] =    {160, 150};
 #define CLOCK_PIN             31
 #define LED_TYPE              APA102
 #define COLOR_ORDER           BGR
-#define BRIGHTNESS            40
+#define BRIGHTNESS            50
 #define FRAMES_PER_SECOND     120
+//LED Strip arrays
 CRGBArray<NUM_LEDS> leds;
 CRGB color[2];
-//String color[2];
 uint8_t numLedsToLight[2] = {0,0};
 
 void setup() {
@@ -78,38 +74,39 @@ void loop() {
   Serial.println(lux);
 
   if (lux > MIN_LIGHT_THRESHOLD) { //Measured light must be above the min threshold
-      for (uint8_t i = 0; i < 2; i++) { // Loop through all the sensors.
-        ms[i] = 0;
-        Serial.print(i);
-        Serial.print(" Ping: ");
-        ms[i] = (sensor[i].ping_median(3)); // Send ping, get distance in cm and print result (0 = outside set distance range)
-        distance[i]=sensor[i].convert_cm(ms[i]);
-        Serial.print(distance[i]);
-        Serial.print("cm");
+      for (uint8_t i = 0; i < 2; i++) { // Loop through both sensors.
+        ms[i] = 0;                      //set ms to null
+        //Serial.print(i);                //Which sensor are we reading from?
+        //Serial.print(" Ping: ");
+        ms[i] = (sensor[i].ping_median(3)); // Send ping, get response in ms (0 = outside set distance range)
+        distance[i]=sensor[i].convert_cm(ms[i]);  //convert ms to cm
+        //Serial.print(distance[i]);    
+        //Serial.print("cm");
         //This calls a linear map function I found that calculate the total pixels to be lit.
-        //May eventually wanna add a constrain() here because sensor readings do tend to be weird.
         numLedsToLight[i] = linearmap(distance[i], tooclose[i], incannotopentrunk[i], 1, (NUM_LEDS/2));
         //Serial.print(" numLedsToLight: ");
         //Serial.println(numLedsToLight[i]);
-        //Clean up lights based on mapping
+        //Clean up lights based on mapping, constrain to only between 0 and 15
         numLedsToLight[i] = constrain(numLedsToLight[i], 0, (NUM_LEDS/2));
-        Serial.print("   numLedsToLight: ");
-        Serial.println(numLedsToLight[i]);   
+        //Serial.print("   numLedsToLight: ");
+        //Serial.println(numLedsToLight[i]);
+        
         //Color logic based on depth measurements
-        if (distance[i] <= tooclose[i]) {
+        if (distance[i] <= tooclose[i] && distance[i] != 0 ) {
           color[i] = CRGB::Red;
+          numLedsToLight[i] = 15;
         } else if (distance[i] > tooclose[i] && distance[i] <=  inopenabletrunk[i]) {
           color[i] = CRGB::Yellow;
         } else if (distance[i] > inopenabletrunk[i] && distance[i] <= incannotopentrunk[i]) {
           color[i] = CRGB::Green;
-        } else if (distance[i] > incannotopentrunk[i]) {
+        } else if (distance[i] > incannotopentrunk[i] || distance[i] == 0) {
           color[i] = CRGB::DodgerBlue;
         } else {
           color[i] = CRGB::Black;
         }
-        distance[i]=0;     
-      }        
+      }
 
+      //Light up those LEDs for each sensor
       leds(0, (15-numLedsToLight[1])).fill_solid(CRGB::Black);
       leds((15-numLedsToLight[1]), 15).fill_solid(color[1]);
       leds(15, (15+numLedsToLight[0])).fill_solid(color[0]);
