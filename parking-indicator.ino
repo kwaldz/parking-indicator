@@ -94,7 +94,7 @@ void loop() {
         //Color logic based on depth measurements
         if (distance[i] <= tooclose[i] && distance[i] != 0 ) {
           color[i] = CRGB::Red;
-          numLedsToLight[i] = 15;
+          numLedsToLight[i] = (NUM_LEDS/2);
         } else if (distance[i] > tooclose[i] && distance[i] <=  inopenabletrunk[i]) {
           color[i] = CRGB::Yellow;
         } else if (distance[i] > inopenabletrunk[i] && distance[i] <= incannotopentrunk[i]) {
@@ -107,10 +107,10 @@ void loop() {
       }
 
       //Light up those LEDs for each sensor
-      leds(0, (15-numLedsToLight[1])).fill_solid(CRGB::Black);
-      leds((15-numLedsToLight[1]), 15).fill_solid(color[1]);
-      leds(15, (15+numLedsToLight[0])).fill_solid(color[0]);
-      leds((15+numLedsToLight[0]), NUM_LEDS).fill_solid(CRGB::Black);
+      leds(0, ((NUM_LEDS/2-numLedsToLight[1])).fill_solid(CRGB::Black);
+      leds(((NUM_LEDS/2-numLedsToLight[1]), (NUM_LEDS/2).fill_solid(color[1]);
+      leds((NUM_LEDS/2, ((NUM_LEDS/2+numLedsToLight[0])).fill_solid(color[0]);
+      leds(((NUM_LEDS/2+numLedsToLight[0]), NUM_LEDS).fill_solid(CRGB::Black);
 
       FastLED.show();
       //
