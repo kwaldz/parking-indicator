@@ -43,7 +43,7 @@ int inopenabletrunk[2] =      {137, 125};
 int incannotopentrunk[2] =    {160, 150};
 
 //LED Strip constants
-#define NUM_LEDS              30
+#define NUM_LEDS              60
 #define DATA_PIN              30
 #define CLOCK_PIN             31
 #define LED_TYPE              APA102
@@ -54,6 +54,7 @@ int incannotopentrunk[2] =    {160, 150};
 CRGBArray<NUM_LEDS> leds;
 CRGB color[2];
 uint8_t numLedsToLight[2] = {0,0};
+int halfway = NUM_LEDS/2;
 
 void setup() {
   delay(2000); // 2 second delay for recovery
@@ -107,10 +108,10 @@ void loop() {
       }
 
       //Light up those LEDs for each sensor
-      leds(0, ((NUM_LEDS/2-numLedsToLight[1])).fill_solid(CRGB::Black);
-      leds(((NUM_LEDS/2-numLedsToLight[1]), (NUM_LEDS/2).fill_solid(color[1]);
-      leds((NUM_LEDS/2, ((NUM_LEDS/2+numLedsToLight[0])).fill_solid(color[0]);
-      leds(((NUM_LEDS/2+numLedsToLight[0]), NUM_LEDS).fill_solid(CRGB::Black);
+      leds(0, ((NUM_LEDS/2)-numLedsToLight[1])).fill_solid(CRGB::Black);
+      leds(((NUM_LEDS/2)-numLedsToLight[1]), (NUM_LEDS/2)).fill_solid(color[1]);
+      leds((NUM_LEDS/2), ((NUM_LEDS/2)+numLedsToLight[0])).fill_solid(color[0]);
+      leds(((NUM_LEDS/2)+numLedsToLight[0]), NUM_LEDS).fill_solid(CRGB::Black);
 
       FastLED.show();
       //
